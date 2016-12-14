@@ -1,24 +1,22 @@
-# Wildcard SSL certificates;
-ssl_certificate     /etc/ssl/host.pem;
-ssl_certificate_key   /etc/ssl/host.key;
-
-# Redirect HTTP to HTTPS;
+# Redirect HTTP to HTTPS
 server {
-  server_name _;
+  server_name example.com;
   return 301 https://$host$request_uri;
 }
 
-# The PROXY;
+# The PROXY
 server {
-  # HTTP authentication backend;
-  set $auth_backend "http://127.0.0.1:3311";
   listen 443 ssl;
-  server_name _;
 
-  # Proxy all the request to the backend;
+  ssl_certificate /etc/ssl/host.pem;
+  ssl_certificate_key /etc/ssl/host.key;
+
+  server_name example.com;
+
+  # Proxy all the request to the backend
   location / {
     proxy_cache off;
-    proxy_pass $auth_backend;
+    proxy_pass "http://127.0.0.1:3311";
     proxy_set_header X-Forwarded-Proto $scheme;
     proxy_set_header X-Forwarded-Host $host;
     proxy_set_header Host $host;
@@ -26,18 +24,19 @@ server {
     proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
   }
 
-  # The backend redirects the request to /reproxy;
+  # The backend redirects the request to /reproxy using X-Accel-Redirect
   location /reproxy {
-    # make this location internal-use only;
+    # Make this location only accessible through an X-Accel-Redirect header
+    # External requests to /reproxy will be ignored by Nginx
+    # See https://www.nginx.com/resources/wiki/start/topics/examples/x-accel/
     internal;
 
     # set DNS;
     # resolver 8.8.8.8; # is this even needed?
 
-    # set $reproxy variable to the value of X-Reproxy-URL header;
+    # Proxy request to the received X-Reproxy-URL value
+    # (Nginx doesn't allow passing $upstream_http_* vars directly to proxy_pass)
     set $reproxy $upstream_http_x_reproxy_url;
-
-    # proxy request to the received X-Reproxy-URL value;
     proxy_pass $reproxy;
   }
 }
