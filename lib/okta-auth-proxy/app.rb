@@ -14,7 +14,7 @@ module OktaAuthProxy
         protected!
         # If authorized, serve request
         if url = authorized?(request.host)
-          headers "X-Remote-User" => session[:email]
+          headers "X-Remote-User" => session[:uid]
           # Conserve the request method
           if request.referrer and not request.referrer.include? '.okta.com'
             headers "X-Reproxy-Method" => request.request_method
