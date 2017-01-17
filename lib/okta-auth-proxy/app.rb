@@ -15,6 +15,10 @@ module OktaAuthProxy
         # If authorized, serve request
         if url = authorized?(request.host)
           headers "X-Remote-User" => session[:email]
+          # Conserve the request method
+          if request.referrer and not request.referrer.include? '.okta.com'
+            headers "X-Reproxy-Method" => request.request_method
+          end
           headers "X-Reproxy-URL" => File.join(url, request.fullpath)
           headers "X-Accel-Redirect" => "/reproxy"
           redirect to('http://localhost')

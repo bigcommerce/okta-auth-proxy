@@ -37,6 +37,12 @@ server {
     # set $reproxy variable to the value of X-Reproxy-URL header;
     set $reproxy $upstream_http_x_reproxy_url;
 
+    if ($upstream_http_x_reproxy_method = 'POST') {
+      rewrite_by_lua '
+          ngx.req.set_method(ngx.HTTP_POST)
+          ';
+    }
+
     # proxy request to the received X-Reproxy-URL value;
     proxy_pass $reproxy;
   }
