@@ -33,6 +33,10 @@ bundle exec okta-auth-proxy serve
 
 # Credits
 
+Based on work of
+* https://github.com/dalehamel (original author)
+* https://github.com/stecman (fork author)
+
 This was inspired by smashing the ideas from projects together:
 
 * https://antoineroygobeil.com/blog/2014/2/6/nginx-ruby-auth/
