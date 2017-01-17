@@ -21,7 +21,7 @@ module OktaAuthProxy
           end
           headers "X-Reproxy-URL" => File.join(url, request.fullpath)
           headers "X-Accel-Redirect" => "/reproxy"
-          redirect to('http://localhost')
+          redirect to('http://localhost'), 307
         end
       end
 
@@ -37,7 +37,7 @@ module OktaAuthProxy
         else
           session[:remote_ip] = request.env['HTTP_X_REAL_IP']
         end
-        redirect to(params[:RelayState] || '/')
+        redirect to(params[:RelayState] || '/'), 307
       end
 
       send verb, '/auth/failure' do
