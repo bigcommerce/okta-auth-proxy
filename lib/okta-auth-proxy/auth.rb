@@ -15,11 +15,22 @@ module OktaAuthProxy
       end
 
       def authorized?(host)
-        if session[:uid]
-          return ENV['PROXY_TARGET']
+        check_remote_ip = nil
+        if request.env.has_key? 'HTTP_X_FORWARDED_FOR'
+          check_remote_ip = request.env['HTTP_X_FORWARDED_FOR']
         else
+          check_remote_ip = request.env['HTTP_X_REAL_IP']
+        end
+
+        if session[:remote_ip] != check_remote_ip
           return false
         end
+
+        if ! session[:uid]
+          return false
+        end
+
+        return ENV['PROXY_TARGET']
       end
     end
 
