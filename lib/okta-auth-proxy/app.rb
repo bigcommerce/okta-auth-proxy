@@ -13,6 +13,13 @@ module OktaAuthProxy
       @logger
     end
 
+    def extend_session
+      if session[:logged]
+        current_time = Time.new
+        session[:expire] = current_time.to_i + (ENV['SESSION_EXPIRE'] || 1800)
+      end
+    end
+
      # Block that is called back when authentication is successful
     [:get, :post, :put, :head, :delete, :options, :patch, :link, :unlink].each do |verb|
 
@@ -36,6 +43,7 @@ module OktaAuthProxy
           end
           headers "X-Reproxy-URL" => File.join(url, request.fullpath)
           headers "X-Accel-Redirect" => "/reproxy"
+          extend_session
           redirect to('http://localhost'), 307
         end
       end
@@ -52,6 +60,7 @@ module OktaAuthProxy
         else
           session[:remote_ip] = request.env['HTTP_X_REAL_IP']
         end
+        extend_session
         redirect to(params[:RelayState] || '/'), 307
       end
 

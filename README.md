@@ -12,6 +12,7 @@ Set the following environment variables
 * CERT\_PATH: Path to the certificate provided by Okta
 * COOKIE\_SECRET: a secure random secret for the cookie
 * COOKIE\_DOMAIN: The domain to use for the cookie
+* SESSION\_EXPIRE: Idle session expiration time in seconds
 
 If okta authentication succeeds, a cookie will be created and stored for the session. All requests are proxied through proxy target if authentication succeeds.
 

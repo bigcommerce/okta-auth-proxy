@@ -15,6 +15,10 @@ module OktaAuthProxy
       end
 
       def authorized?(host)
+        if ! session[:uid]
+          return false
+        end
+
         check_remote_ip = nil
         if request.env.has_key? 'HTTP_X_FORWARDED_FOR'
           check_remote_ip = request.env['HTTP_X_FORWARDED_FOR']
@@ -26,7 +30,8 @@ module OktaAuthProxy
           return false
         end
 
-        if ! session[:uid]
+        current_time = Time.new
+        if session[:expire] < current_time.to_i
           return false
         end
 
