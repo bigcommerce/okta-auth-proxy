@@ -5,9 +5,6 @@ require 'securerandom'
 
 module OktaAuthProxy
   module OktaAuth
-
-    COOKIE_DOMAIN = ENV.fetch('COOKIE_DOMAIN', 'localhost')
-
     module AuthHelpers
       def protected!
         return if authorized?(request.host)
@@ -17,7 +14,7 @@ module OktaAuthProxy
       def authorized?(_host)
         return false unless session[:uid]
 
-        if request.env.has_key? 'HTTP_X_FORWARDED_FOR'
+        if request.env.has_key?('HTTP_X_FORWARDED_FOR')
           check_remote_ip = request.env['HTTP_X_FORWARDED_FOR']
         else
           check_remote_ip = request.env['HTTP_X_REAL_IP']
@@ -35,16 +32,31 @@ module OktaAuthProxy
       app.helpers OktaAuthProxy::OktaAuth::AuthHelpers
 
       # Use a wildcard cookie to achieve single sign-on for all subdomains
-      app.use Rack::Session::Cookie, secret: ENV['COOKIE_SECRET'] || SecureRandom.random_bytes(24),
-                                     domain: COOKIE_DOMAIN
+      app.use Rack::Session::Cookie, secret: ENV.fetch('COOKIE_SECRET', SecureRandom.random_bytes(24)),
+                                     domain: cookie_domain
       app.use OmniAuth::Builder do
         provider :saml,
-        issuer:                             ENV['SSO_ISSUER'],
-        idp_sso_target_url:                 ENV['SSO_TARGET_URL'],
-        idp_cert:                           ENV.fetch('SSO_CERT', File.read( ENV['CERT_PATH'] || 'okta_cert.pem')).to_s.gsub("\\n","\\n"),
-        name_identifier_format:             "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
-        idp_sso_target_url_runtime_params:  {:redirectUrl => :RelayState}
+        issuer: ENV['SSO_ISSUER'],
+        idp_sso_target_url: ENV['SSO_TARGET_URL'],
+        idp_cert: sso_cert,
+        name_identifier_format: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
+        idp_sso_target_url_runtime_params:  {
+          redirectUrl: :RelayState
+        }
       end
+    end
+
+    def self.sso_cert
+      env_cert = ENV.fetch('SSO_CERT', nil)
+      if env_cert
+        env_cert.to_s.gsub("\\n","\\n")
+      else
+        File.read( ENV['CERT_PATH'] || 'okta_cert.pem')
+      end
+    end
+
+    def self.cookie_domain
+      ENV.fetch('COOKIE_DOMAIN', 'localhost')
     end
   end
 end

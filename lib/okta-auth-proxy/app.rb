@@ -28,8 +28,8 @@ module OktaAuthProxy
         pass if request.path == '/auth/saml/callback'
         pass if request.path == '/auth/failure'
 
-        if request.host != OktaAuth::COOKIE_DOMAIN
-          @logger.warn "Request host (#{request.host}) and COOKIE_DOMAIN (#{OktaAuth::COOKIE_DOMAIN}) " +
+        if request.host != OktaAuth.cookie_domain
+          @logger.warn "Request host (#{request.host}) and COOKIE_DOMAIN (#{OktaAuth.cookie_domain}) " +
             "do not match. Cookies will not be set or readable. Check your COOKIE_DOMAIN value."
         end
 
