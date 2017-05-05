@@ -8,7 +8,7 @@ module OktaAuthProxy
 
     def initialize
       super
-      @logger =  Logger.new(STDOUT)
+      @logger = Logger.new(STDOUT)
       @logger.progname = 'okta-auth-proxy'
       @logger
     end
@@ -16,7 +16,7 @@ module OktaAuthProxy
     def extend_session
       if session[:logged]
         current_time = Time.new
-        session[:expire] = current_time.to_i + (ENV['SESSION_EXPIRE'] || 1800)
+        session[:expire] = current_time.to_i + ENV.fetch('SESSION_EXPIRE', 1800).to_i
       end
     end
 
@@ -24,7 +24,7 @@ module OktaAuthProxy
     [:get, :post, :put, :head, :delete, :options, :patch, :link, :unlink].each do |verb|
 
       send verb, '/*' do
-        pass if request.host == (ENV['AUTH_DOMAIN'] || 'localhost')
+        pass if request.host == ENV.fetch('AUTH_DOMAIN', 'localhost')
         pass if request.path == '/auth/saml/callback'
         pass if request.path == '/auth/failure'
 
@@ -35,7 +35,8 @@ module OktaAuthProxy
 
         protected!
         # If authorized, serve request
-        if url = authorized?(request.host)
+        url = authorized?(request.host)
+        if url
           headers "X-Remote-User" => session[:uid]
           # Conserve the request method
           if request.referrer and not request.referrer.include? '.okta.com'

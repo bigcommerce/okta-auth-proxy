@@ -18,7 +18,7 @@ module OktaAuthProxy
           run app
         end
       end
-      @server = Thin::Server.new(port, bind, dispatch, threadpool_size: threads).backend
+      @server = ::Thin::Server.new(port, bind, dispatch, threadpool_size: threads).backend
     end
 
     def start

@@ -6,7 +6,7 @@ require 'securerandom'
 module OktaAuthProxy
   module OktaAuth
 
-    COOKIE_DOMAIN = ENV['COOKIE_DOMAIN'] || 'localhost'
+    COOKIE_DOMAIN = ENV.fetch('COOKIE_DOMAIN', 'localhost')
 
     module AuthHelpers
       def protected!
@@ -14,10 +14,8 @@ module OktaAuthProxy
         redirect to("/auth/saml?redirectUrl=#{URI::encode(request.path)}")
       end
 
-      def authorized?(host)
-        if ! session[:uid]
-          return false
-        end
+      def authorized?(_host)
+        return false unless session[:uid]
 
         check_remote_ip = nil
         if request.env.has_key? 'HTTP_X_FORWARDED_FOR'
@@ -26,16 +24,11 @@ module OktaAuthProxy
           check_remote_ip = request.env['HTTP_X_REAL_IP']
         end
 
-        if session[:remote_ip] != check_remote_ip
-          return false
-        end
+        return false if session[:remote_ip] != check_remote_ip
 
         current_time = Time.new
-        if session[:expire] < current_time.to_i
-          return false
-        end
-
-        return ENV['PROXY_TARGET']
+        return false if session[:expire] < current_time.to_i
+        ENV['PROXY_TARGET']
       end
     end
 
