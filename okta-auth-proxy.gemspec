@@ -22,7 +22,7 @@ Gem::Specification.new do |s|
   s.add_runtime_dependency 'em-synchrony', '~> 1.0.4'
   s.add_runtime_dependency 'thin', '~> 1.6.4'
   s.add_runtime_dependency 'thor', '~> 0.19.1'
-  s.add_runtime_dependency 'activesupport', '~> 4.2.5'
+  s.add_runtime_dependency 'activesupport', '~> 4.2.7.1'
 
   s.add_development_dependency 'pry', '~> 0.10.3'
   s.add_development_dependency 'pry-byebug', '~> 3.3.0'
