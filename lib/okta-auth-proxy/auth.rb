@@ -38,7 +38,7 @@ module OktaAuthProxy
         provider :saml,
         issuer: ENV['SSO_ISSUER'],
         idp_sso_target_url: ENV['SSO_TARGET_URL'],
-        idp_cert: sso_cert,
+        idp_cert: OktaAuthProxy::OktaAuth.sso_cert,
         name_identifier_format: 'urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress',
         idp_sso_target_url_runtime_params:  {
           redirectUrl: :RelayState
