@@ -2,3 +2,4 @@ vendor/
 *.gem
 .DS_Store
 .idea
+.env

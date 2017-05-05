@@ -17,7 +17,6 @@ module OktaAuthProxy
       def authorized?(_host)
         return false unless session[:uid]
 
-        check_remote_ip = nil
         if request.env.has_key? 'HTTP_X_FORWARDED_FOR'
           check_remote_ip = request.env['HTTP_X_FORWARDED_FOR']
         else
@@ -42,7 +41,7 @@ module OktaAuthProxy
         provider :saml,
         issuer:                             ENV['SSO_ISSUER'],
         idp_sso_target_url:                 ENV['SSO_TARGET_URL'],
-        idp_cert:                           File.read( ENV['CERT_PATH'] || 'okta_cert.pem'),
+        idp_cert:                           ENV.fetch('SSO_CERT', File.read( ENV['CERT_PATH'] || 'okta_cert.pem')).to_s.gsub("\\n","\\n"),
         name_identifier_format:             "urn:oasis:names:tc:SAML:1.1:nameid-format:emailAddress",
         idp_sso_target_url_runtime_params:  {:redirectUrl => :RelayState}
       end
